@@ -1,18 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import { generatePixelSprite } from './services/geminiService';
-import { GeneratedImage, GeneratorState } from './types';
-import { Gallery } from './components/Gallery';
+import { GeneratorState } from './types';
+import Gallery from './components/Gallery';
 import { Sparkles, Wand2, Loader2, AlertCircle, Terminal, Layers } from 'lucide-react';
 
 const INITIAL_PROMPT = "A 64x64 pixel art sprite of a white Silkie chicken, side view, cute, fluffy texture like cotton, dark beak and face, light blue background, game asset style, crisp pixel edges.";
 
 export default function App() {
   const [prompt, setPrompt] = useState(INITIAL_PROMPT);
-  const [state, setState] = useState<GeneratorState>(GeneratorState.IDLE);
-  const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<GeneratedImage[]>([]);
+  const [state, setState] = useState(GeneratorState.IDLE);
+  const [error, setError] = useState(null);
+  const [history, setHistory] = useState([]);
 
-  const handleGenerate = async (e: React.FormEvent) => {
+  const handleGenerate = async (e) => {
     e.preventDefault();
     if (!prompt.trim()) return;
 
@@ -22,31 +22,30 @@ export default function App() {
     try {
       const base64Image = await generatePixelSprite(prompt);
       
-      const newImage: GeneratedImage = {
+      const newImage = {
         id: crypto.randomUUID(),
         url: base64Image,
         prompt: prompt,
         timestamp: Date.now(),
-        width: 1024, // Model default
+        width: 1024,
         height: 1024
       };
 
       setHistory(prev => [newImage, ...prev]);
       setState(GeneratorState.SUCCESS);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setError(err.message || "Failed to generate image");
       setState(GeneratorState.ERROR);
     }
   };
 
-  const handleDelete = useCallback((id: string) => {
+  const handleDelete = useCallback((id) => {
     setHistory(prev => prev.filter(item => item.id !== id));
   }, []);
 
   return (
     <div className="min-h-screen bg-[#0f172a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0f172a] to-black">
-      {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -64,14 +63,11 @@ export default function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-12">
-        
-        {/* Generator Section */}
         <section className="relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-2xl blur opacity-20"></div>
           <div className="relative bg-slate-900 border border-slate-800 rounded-xl p-6 sm:p-8 shadow-2xl">
             <div className="flex flex-col md:flex-row gap-8 items-start">
               
-              {/* Input Side */}
               <div className="flex-1 w-full space-y-6">
                 <div>
                    <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
@@ -132,7 +128,6 @@ export default function App() {
                 )}
               </div>
 
-              {/* Preview Side (Last Generated) */}
               <div className="w-full md:w-1/3 flex flex-col gap-4">
                  <div className="bg-slate-950/50 rounded-xl border-2 border-dashed border-slate-800 aspect-square flex items-center justify-center overflow-hidden relative">
                     {state === GeneratorState.LOADING ? (
@@ -144,7 +139,7 @@ export default function App() {
                       <img 
                         src={history[0].url} 
                         alt="Preview" 
-                        className="w-full h-full object-contain image-pixelated"
+                        className="w-full h-full object-contain"
                         style={{ imageRendering: 'pixelated' }}
                       />
                     ) : (
@@ -166,7 +161,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* Gallery Section */}
         <Gallery images={history} onDelete={handleDelete} />
       </main>
     </div>

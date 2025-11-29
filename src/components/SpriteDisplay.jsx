@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 
-export const SpriteDisplay = ({ image, onDelete }) => {
+export default function SpriteDisplay({ image, onDelete }) {
   const [pixelated, setPixelated] = useState(true);
   
   const downloadResized = (size) => {
